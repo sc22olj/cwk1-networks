@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.net.*;
 import java.io.*;
 
@@ -14,7 +13,7 @@ public class Client {
 
 	}
 
-	static void put(String fname) {
+	private static void put(String fname) {
 
 		return;
 	}
@@ -40,9 +39,9 @@ public class Client {
 
 			System.exit(1);
 
-		} catch (IOException IOerror) {
+		} catch (IOException ioError) {
 
-			System.out.println(IOerror);
+			System.out.println(ioError);
 
 			System.exit(1);
 
@@ -100,6 +99,22 @@ public class Client {
 		client.connect("localhost", 80);
 
 		// Perform the desired operation
+		client.output.print("testing123");
+
+		try {
+
+			// Wait until the server says OK
+			while (!(client.input.readLine()).equals("OK")) {
+
+			}
+
+		} catch (IOException ioError) {
+
+			System.out.println(ioError);
+
+			System.exit(1);
+
+		}
 
 		// Disconnect from the local server on port 80
 		// Close input and output streams
