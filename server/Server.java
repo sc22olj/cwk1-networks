@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
@@ -46,7 +43,7 @@ public class Server {
 		Server server = new Server();
 
 		// Create an executor server on port 80
-		server.runServer(80);
+		server.runServer(9500);
 
 	}
 
@@ -93,23 +90,103 @@ public class Server {
 		// Handle the commands that come from the client
 		private void handleRequest() {
 
+			String firstLine;
+
 			try {
 
-				// Read and print what was sent from the client
-				System.out.println(input.readLine());
+				// Read first line to check the command type
+				firstLine = input.readLine();
 
-				// Send OK message back
-				output.print("OK");
+				if (firstLine.equals("LIST")) list();
+
+				if (firstLine.equals("PUT")) put();
+
+				output.println("TERMINATE");
 
 			} catch (IOException ioError) {
 
 				System.out.println(ioError);
 
-				System.exit(1);
+			} finally {
+
+				// Close resources to prevent leaks
+				try {
+
+					if (input != null) input.close();
+
+					if (output != null) output.close();
+
+					if (clientSocket != null) clientSocket.close();
+
+				} catch (IOException ioError) {
+
+					System.out.println(ioError);
+
+				
+				}
 
 			}
 
 			return;
+		}
+
+		// Handle the list command
+		private void list() {
+
+			// Specify the directory
+			File directory = new File("./serverFiles");
+
+			// Get all files in the directory
+			File[] files = directory.listFiles();
+	
+			// Print out each file
+			for (File file : files) {
+
+				output.println(file.getName());
+
+			}
+
+			return;
+
+		}
+
+		// Handle the put command
+		private void put() {
+
+			String inputLine;
+
+			try {
+
+				// Read next line which should be filename
+				File file = new File(input.readLine());
+
+				if (!file.createNewFile()) {
+
+					output.println("File already exists");
+
+				}
+
+				PrintWriter fileWriter = new PrintWriter(file);
+
+				while ((inputLine = input.readLine()) != null) {
+
+					if (inputLine.equals("TERMINATE")) {
+	
+						break;
+		
+					}
+
+					fileWriter.println(inputLine);
+	
+				}
+
+				fileWriter.close();
+
+			} catch (IOException ioError) {
+
+				System.out.println(ioError);
+
+			}
 
 		}
 	
