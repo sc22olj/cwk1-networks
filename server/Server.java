@@ -1,6 +1,11 @@
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class Server {
 
@@ -51,8 +56,10 @@ public class Server {
 	private class ClientHandler implements Runnable {
 
 		private Socket clientSocket;
+		private String clientIP;
 		private BufferedReader input;
 		private PrintWriter output;
+		private Log log;
 
 		// Constructor to allow client handler to store the client's socket
 		public ClientHandler(Socket clientSocket) {
@@ -67,6 +74,10 @@ public class Server {
 			System.out.println("Server: found host");
 
 			try {
+
+				// Create a string for the client IP
+				clientIP = (InetAddress.getLocalHost()).getHostAddress();
+
 				// Set up IO streams
 				// Create buffered reader input
 				input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
@@ -99,15 +110,20 @@ public class Server {
 
 				if (firstLine.equals("LIST")) list();
 
-				if (firstLine.equals("PUT")) put();
+				else if (firstLine.equals("PUT")) put();
 
-				output.println("TERMINATE");
+				else throw new Exception("Command not recognised");
 
-			} catch (IOException ioError) {
+				// Create a new log
+				Log log = new Log(clientIP, firstLine);
 
-				System.out.println(ioError);
+			} catch (Exception error) {
+
+				System.out.println(error);
 
 			} finally {
+
+				output.println("TERMINATE");
 
 				// Close resources to prevent leaks
 				try {
@@ -168,16 +184,30 @@ public class Server {
 
 				PrintWriter fileWriter = new PrintWriter(file);
 
+				String previousLine = null;
+
 				while ((inputLine = input.readLine()) != null) {
 
 					if (inputLine.equals("TERMINATE")) {
-	
-						break;
-		
-					}
 
-					fileWriter.println(inputLine);
-	
+						break;
+
+					}
+		
+					if (previousLine != null) {
+
+						fileWriter.println(previousLine);
+
+					}
+		
+					previousLine = inputLine;
+
+				}
+		
+				if (previousLine != null) {
+
+					fileWriter.print(previousLine);
+
 				}
 
 				fileWriter.close();
@@ -190,6 +220,48 @@ public class Server {
 
 		}
 	
+	}
+
+	private class Log {
+
+		String clientIP;
+		String request;
+
+		Log(String clientIP, String request) {
+
+			this.clientIP = clientIP;
+			this.request = request;
+
+			File file = new File("log.txt");
+
+			try {
+				
+				if (file.createNewFile()) {
+
+					System.out.println("File created");
+
+				}
+
+			} catch (IOException ioError) {
+
+				System.out.println(ioError);
+
+			}
+
+		}
+
+		@Override
+		public String toString() {
+			
+			LocalDateTime currentDateTime = LocalDateTime.now();
+
+			String date = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        	String time = currentDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+			return date + " | " + time + " | " + clientIP + " | " + request;
+		}
+
 	}
 
 }
