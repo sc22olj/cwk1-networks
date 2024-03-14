@@ -1,21 +1,20 @@
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.concurrent.*;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 
 public class Server {
 
 	private ServerSocket serverSocket;
 	private ExecutorService service;
+	private Log serverLog;
 
 	public void runServer(int port) {
 
 		// Create 20 thread executor pool
 		service = Executors.newFixedThreadPool(20);
+
+		// Create a new log
+		serverLog = new Log();
 
 		try {
 
@@ -59,7 +58,6 @@ public class Server {
 		private String clientIP;
 		private BufferedReader input;
 		private PrintWriter output;
-		private Log log;
 
 		// Constructor to allow client handler to store the client's socket
 		public ClientHandler(Socket clientSocket) {
@@ -108,21 +106,39 @@ public class Server {
 				// Read first line to check the command type
 				firstLine = input.readLine();
 
-				if (firstLine.equals("LIST")) list();
+				// Run corresponding command
+				if (firstLine.equals("LIST")) {
+					
+					list();
 
-				else if (firstLine.equals("PUT")) put();
+				} else if (firstLine.equals("PUT")) {
+					
+					if (!put()) {
 
-				else throw new Exception("Command not recognised");
+						output.println("File already exists on server");
 
-				// Create a new log
-				Log log = new Log(clientIP, firstLine);
+						return;
 
-			} catch (Exception error) {
+					}
 
-				System.out.println(error);
+				} else {
+					
+					output.println("Invalid command");
+
+					return;
+
+				}
+
+				// Store the request in the log file
+				serverLog.writeLogToFile(clientIP, firstLine.toLowerCase());
+
+			} catch (IOException ioError) {
+
+				System.out.println(ioError);
 
 			} finally {
 
+				// Tell client that output (if any)
 				output.println("TERMINATE");
 
 				// Close resources to prevent leaks
@@ -138,7 +154,6 @@ public class Server {
 
 					System.out.println(ioError);
 
-				
 				}
 
 			}
@@ -167,7 +182,7 @@ public class Server {
 		}
 
 		// Handle the put command
-		private void put() {
+		private Boolean put() {
 
 			String inputLine;
 
@@ -176,12 +191,15 @@ public class Server {
 				// Read next line which should be filename
 				File file = new File(input.readLine());
 
+				// Create the file
+				// Check it doesn't already exist
 				if (!file.createNewFile()) {
 
-					output.println("File already exists");
+					return false;
 
 				}
 
+				// Write to the file
 				PrintWriter fileWriter = new PrintWriter(file);
 
 				String previousLine = null;
@@ -193,7 +211,8 @@ public class Server {
 						break;
 
 					}
-		
+					
+					// Print previous line so that EOF newline is avoided
 					if (previousLine != null) {
 
 						fileWriter.println(previousLine);
@@ -218,50 +237,10 @@ public class Server {
 
 			}
 
+			return true;
+
 		}
 	
-	}
-
-	private class Log {
-
-		String clientIP;
-		String request;
-
-		Log(String clientIP, String request) {
-
-			this.clientIP = clientIP;
-			this.request = request;
-
-			File file = new File("log.txt");
-
-			try {
-				
-				if (file.createNewFile()) {
-
-					System.out.println("File created");
-
-				}
-
-			} catch (IOException ioError) {
-
-				System.out.println(ioError);
-
-			}
-
-		}
-
-		@Override
-		public String toString() {
-			
-			LocalDateTime currentDateTime = LocalDateTime.now();
-
-			String date = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        	String time = currentDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-
-			return date + " | " + time + " | " + clientIP + " | " + request;
-		}
-
 	}
 
 }
