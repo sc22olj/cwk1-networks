@@ -2,6 +2,7 @@ import java.io.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
+// Class which creates a log file
 public class Log {
 
     FileWriter logFileWriter;
@@ -22,6 +23,7 @@ public class Log {
 
     }
 
+    // Returns a string in the specified format
     public String logToString(String clientIP, String request) {
         
         LocalDateTime currentDateTime = LocalDateTime.now();
@@ -33,6 +35,7 @@ public class Log {
         return date + " | " + time + " | " + clientIP + " | " + request;
     }
 
+    // Writes a string to the log file by opening and appending it
     public void writeLogToFile(String clientIP, String request) {
 
         try {

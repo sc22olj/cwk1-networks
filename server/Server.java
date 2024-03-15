@@ -13,12 +13,12 @@ public class Server {
 		// Create 20 thread executor pool
 		service = Executors.newFixedThreadPool(20);
 
-		// Create a new log
+		// Create a new log file
 		serverLog = new Log();
 
 		try {
 
-			// Create serversocket on port
+			// Create serversocket on port 9500
 			serverSocket = new ServerSocket(port);
 			
 			// Infinite loop for running server
@@ -32,9 +32,9 @@ public class Server {
 
 			}
 
-		} catch (IOException IOerror) {
+		} catch (IOException ioError) {
 
-			System.out.println(IOerror);
+			System.out.println(ioError);
 
 			System.exit(1);
 
@@ -44,9 +44,9 @@ public class Server {
 
 	public static void main( String[] args ) {
 
+		// Create and run a server on port 9500
 		Server server = new Server();
 
-		// Create an executor server on port 80
 		server.runServer(9500);
 
 	}
@@ -69,19 +69,16 @@ public class Server {
 		@Override
 		public void run() {
 
-			System.out.println("Server: found host");
-
 			try {
 
 				// Create a string for the client IP
-				clientIP = (InetAddress.getLocalHost()).getHostAddress();
+				clientIP = InetAddress.getLocalHost().getHostAddress();
 
 				// Set up IO streams
 				// Create buffered reader input
 				input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
 				
 				// Create printwriter output
-				// Autoflush on
 				output = new PrintWriter(clientSocket.getOutputStream(), true);
 			
 			} catch (IOException ioError) {
@@ -113,6 +110,7 @@ public class Server {
 
 				} else if (firstLine.equals("PUT")) {
 					
+					// Make sure that the file was created
 					if (!put()) {
 
 						output.println("File already exists on server");
@@ -161,7 +159,8 @@ public class Server {
 			return;
 		}
 
-		// Handle the list command
+		// Reads the files in the serverFiles directory
+		// Send the file names to the client
 		private void list() {
 
 			// Specify the directory
@@ -181,7 +180,8 @@ public class Server {
 
 		}
 
-		// Handle the put command
+		// Handles recieving a file from a client
+		// Returns false if the file sent by the client already exists in the server
 		private Boolean put() {
 
 			String inputLine;
@@ -212,7 +212,7 @@ public class Server {
 
 					}
 					
-					// Print previous line so that EOF newline is avoided
+					// Print previous line so EOF newline can be avoided
 					if (previousLine != null) {
 
 						fileWriter.println(previousLine);
@@ -222,7 +222,8 @@ public class Server {
 					previousLine = inputLine;
 
 				}
-		
+				
+				// Final line is printed without newline
 				if (previousLine != null) {
 
 					fileWriter.print(previousLine);
