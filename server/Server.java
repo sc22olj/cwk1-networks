@@ -20,7 +20,7 @@ public class Server {
 
 			// Create serversocket on port 9500
 			serverSocket = new ServerSocket(port);
-			
+
 			// Infinite loop for running server
 			while (true) {
 
@@ -42,7 +42,7 @@ public class Server {
 
 	}
 
-	public static void main( String[] args ) {
+	public static void main(String[] args) {
 
 		// Create and run a server on port 9500
 		Server server = new Server();
@@ -61,7 +61,7 @@ public class Server {
 
 		// Constructor to allow client handler to store the client's socket
 		public ClientHandler(Socket clientSocket) {
-			
+
 			this.clientSocket = clientSocket;
 
 		}
@@ -77,10 +77,10 @@ public class Server {
 				// Set up IO streams
 				// Create buffered reader input
 				input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-				
+
 				// Create printwriter output
 				output = new PrintWriter(clientSocket.getOutputStream(), true);
-			
+
 			} catch (IOException ioError) {
 
 				System.out.println(ioError);
@@ -90,7 +90,7 @@ public class Server {
 			}
 
 			handleRequest();
-	
+
 		}
 
 		// Handle the commands that come from the client
@@ -105,11 +105,11 @@ public class Server {
 
 				// Run corresponding command
 				if (firstLine.equals("LIST")) {
-					
+
 					list();
 
 				} else if (firstLine.equals("PUT")) {
-					
+
 					// Make sure that the file was created
 					if (!put()) {
 
@@ -120,7 +120,7 @@ public class Server {
 					}
 
 				} else {
-					
+
 					output.println("Invalid command");
 
 					return;
@@ -142,11 +142,14 @@ public class Server {
 				// Close resources to prevent leaks
 				try {
 
-					if (input != null) input.close();
+					if (input != null)
+						input.close();
 
-					if (output != null) output.close();
+					if (output != null)
+						output.close();
 
-					if (clientSocket != null) clientSocket.close();
+					if (clientSocket != null)
+						clientSocket.close();
 
 				} catch (IOException ioError) {
 
@@ -168,7 +171,7 @@ public class Server {
 
 			// Get all files in the directory
 			File[] files = directory.listFiles();
-	
+
 			// Print out each file
 			for (File file : files) {
 
@@ -211,18 +214,18 @@ public class Server {
 						break;
 
 					}
-					
+
 					// Print previous line so EOF newline can be avoided
 					if (previousLine != null) {
 
 						fileWriter.println(previousLine);
 
 					}
-		
+
 					previousLine = inputLine;
 
 				}
-				
+
 				// Final line is printed without newline
 				if (previousLine != null) {
 
@@ -241,7 +244,7 @@ public class Server {
 			return true;
 
 		}
-	
+
 	}
 
 }

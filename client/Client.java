@@ -7,15 +7,15 @@ public class Client {
 	private BufferedReader input;
 	private PrintWriter output;
 
-	public static void main( String[] args ) {
+	public static void main(String[] args) {
 
 		// Handle command line args
 		// Handle list command
 		if (args.length == 1 && args[0].equals("list")) {
 
 			list();
-		
-		// Handle put command
+
+			// Handle put command
 		} else if (args.length == 2 && args[0].equals("put")) {
 
 			put(args[1]);
@@ -98,7 +98,7 @@ public class Client {
 			// Read the file into the program and send it off line by line
 			String line;
 
-			while((line = fileReader.readLine()) != null) {
+			while ((line = fileReader.readLine()) != null) {
 
 				client.output.println(line);
 
@@ -150,7 +150,7 @@ public class Client {
 
 			// Create buffered reader input
 			input = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
-			
+
 			// Create printwriter output
 			// Autoflush on
 			output = new PrintWriter(serverSocket.getOutputStream(), true);
@@ -167,28 +167,31 @@ public class Client {
 
 			System.exit(1);
 
-		} 
+		}
 
 		return;
 	}
-	
+
 	public void disconnect() {
 
 		// Close resources to prevent leaks
 		try {
 
-			if (input != null) input.close();
+			if (input != null)
+				input.close();
 
-			if (output != null) output.close();
+			if (output != null)
+				output.close();
 
-			if (serverSocket != null) serverSocket.close();
+			if (serverSocket != null)
+				serverSocket.close();
 
 		} catch (IOException IOerror) {
 
 			System.out.println(IOerror);
 
 			System.exit(1);
-			
+
 		}
 
 		return;
