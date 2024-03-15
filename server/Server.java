@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
+// Implements a multithreaded server using an executor pool
+// Logs client request in a text file
 public class Server {
 
 	private ServerSocket serverSocket;
@@ -113,7 +115,7 @@ public class Server {
 					// Make sure that the file was created
 					if (!put()) {
 
-						output.println("File already exists on server");
+						output.println("Error: File already exists on server");
 
 						return;
 
@@ -121,7 +123,7 @@ public class Server {
 
 				} else {
 
-					output.println("Invalid command");
+					output.println("Error: Invalid command");
 
 					return;
 
@@ -192,7 +194,7 @@ public class Server {
 			try {
 
 				// Read next line which should be filename
-				File file = new File(input.readLine());
+				File file = new File("./serverFiles/" + input.readLine());
 
 				// Create the file
 				// Check it doesn't already exist

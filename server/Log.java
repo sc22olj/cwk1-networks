@@ -32,7 +32,7 @@ public class Log {
 
         String time = currentDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
-        return date + " | " + time + " | " + clientIP + " | " + request;
+        return date + "|" + time + "|" + clientIP + "|" + request;
     }
 
     // Writes a string to the log file by opening and appending it

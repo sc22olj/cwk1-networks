@@ -1,6 +1,8 @@
 import java.net.*;
 import java.io.*;
 
+// Implements a simple command line client which can
+// transfer files to a server or request a list of server files
 public class Client {
 
 	private Socket serverSocket;
@@ -127,7 +129,7 @@ public class Client {
 
 		} catch (FileNotFoundException fileError) {
 
-			System.out.println("File does not exist locally");
+			System.out.println("Error: File does not exist locally");
 
 		} catch (IOException ioError) {
 
